@@ -47,7 +47,7 @@ foreach($readline as $line){
 			break;
 		default: // 親プロセス
 			$pids[$pid] = $pid; // 子プロセスIDを保持
-			if ( count( $pids ) >= $argv[1] ) { // 指定のスレッド数より多くなっていれば待機状態へ
+			if ( count( $pids ) >= $argv[1] ) { // 指定のスレッド数より多くなっていれば
 				unset( $pids[ pcntl_waitpid( -1, $status, WUNTRACED ) ] );
 			}
 			break;
