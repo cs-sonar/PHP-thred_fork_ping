@@ -1,17 +1,28 @@
 <?php
-/*
- * autor @gom
- * autor @sonar
+/**
+ * thred_fork_ping.php.
+ * PHP CLI マルチプロセスサンプル.
+ * このプログラムは、テキストに書かれたサーバーへPINGを行い、死活チェックを行うサンプルです。.
+ * usage.
+ * #php thred_fork_ping.php int $param
  *
- * PHP CLI マルチプロセスサンプル
- * このプログラムは、テキストに書かれたホストへPINGを行い、死活チェックを行うサンプルです。
+ * @autor gom
+ * @autor sonar
+ * @param int 並列処理回数
  *
  */
 
-const THREAD = 30;			// プロセス数
+// コマンドラインの引数を取得し、スレッド数としてセット
+if(!$argv[1]){
+	$argv[1] = 1;
+//}elseif(!is_numeric($argv[1])){
+}elseif(!preg_match('/^[1-9][0-9]+$/', $argv[1])){
+	die("引数は正の整数でお願いします。\n");
+	exit;
+}
 
 $time_start = microtime(true);
-$readline = file('test.txt');
+$readline = file('list.dat');
 foreach($readline as $v){
 	$tmp[] = trim($v);
 }
@@ -22,7 +33,7 @@ foreach($readline as $line){
 
 	switch($pid){
 		case -1: // フォーク失敗
-			die("フォーク失敗");
+			die("フォーク失敗\n");
 			break;
 		case 0: // 子プロセス
 			$ping_command_str = "ping -c 2 -w 4 " . $line;
@@ -36,7 +47,7 @@ foreach($readline as $line){
 			break;
 		default: // 親プロセス
 			$pids[$pid] = $pid; // 子プロセスIDを保持
-			if ( count( $pids ) >= THREAD ) { // 指定のスレッド数より多くなっていれば待機状態へ
+			if ( count( $pids ) >= $argv[1] ) { // 指定のスレッド数より多くなっていれば待機状態へ
 				unset( $pids[ pcntl_waitpid( -1, $status, WUNTRACED ) ] );
 			}
 			break;
@@ -50,4 +61,6 @@ foreach($pids as $pid){
 $time_end = microtime(true);
 $time = $time_end - $time_start;
 echo "Parent process finish. time:".$time."\n";
+
+exit;
 
